@@ -8,6 +8,8 @@ Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell P
 
 
 
+I'd suggest loading price data into a new sheet, then using vlookup to get the bits you care about in your main sheet.
+
 An example below:
 
 https://docs.google.com/spreadsheets/d/1f9-4cb4Tx64Do-xmHhELSwZGahZ2mTTkV7mKDBRPrrY/edit?usp=sharing
