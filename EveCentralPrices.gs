@@ -10,22 +10,31 @@ Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell P
 
 I'd suggest loading price data into a new sheet, then using vlookup to get the bits you care about in your main sheet.
 
+=loadPrices(A1:A28)
+=loadPrices(A1:A28,10000002)
+=loadPrices(A1:A28,10000002,47)
+
+
+
 An example below:
 
 https://docs.google.com/spreadsheets/d/1f9-4cb4Tx64Do-xmHhELSwZGahZ2mTTkV7mKDBRPrrY/edit?usp=sharing
 
 */
-function loadPrices(priceIDs,regionID){
+function loadPrices(priceIDs,regionID,cachebuster){
   if (typeof regionID == 'undefined'){ 
     regionID=10000002;
   }
   if (typeof priceIDs == 'undefined'){
- //   throw 'need typeids';
+    throw 'need typeids';
+  }
+  if (typeof cachebuster == 'undefined'){
+    cachebuster=1;
   }
   var prices = new Array();
   var dirtyTypeIds = new Array();
   var cleanTypeIds = new Array();
-  var url="http://api.eve-central.com/api/marketstat?regionlimit="+regionID+"&typeid=";
+  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&regionlimit="+regionID+"&typeid=";
   
  priceIDs.forEach (function (row) {
    row.forEach ( function (cell) {
