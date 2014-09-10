@@ -1,3 +1,11 @@
+/*
+
+Example Sheet
+https://docs.google.com/spreadsheets/d/1d3ixNx5hF5kfj2Zl3g46ODi3mqrb-AB7FDz4p4_8DCo/edit?usp=sharing
+
+
+*/
+
 function loadOutposts(){
   var outposts= new Array();
   var url = "https://api.eveonline.com/eve/ConquerableStationList.xml.aspx";
