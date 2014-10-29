@@ -95,7 +95,7 @@ function loadMarketOrdersResolved(type, keyID, vCode, characterID){
                  stationArray[rows[i].getAttribute("stationID").getValue()+'_'],
                  parseInt(rows[i].getAttribute("volEntered").getValue()),
                  parseInt(rows[i].getAttribute("volRemaining").getValue()),
-                 parseInt(rows[i].getAttribute("minVolume").getValue(),)
+                 parseInt(rows[i].getAttribute("minVolume").getValue()),
                  orderStates[rows[i].getAttribute("orderState").getValue()],
                  typeidArray[rows[i].getAttribute("typeID").getValue()+'_'],
                  parseInt(rows[i].getAttribute("range").getValue()),
