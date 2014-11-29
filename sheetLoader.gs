@@ -12,6 +12,18 @@ To pull a specific skill value:
 =vlookup("skill-3303",Sheet1!A:C,3,false)
 
 
+If you want to do it differently replace
+  skill=['skill-'+skills[j].getAttribute("typeID").getValue(),
+  
+  with
+  
+  skill=['skill',parseInt(skills[j].getAttribute("typeID").getValue()),
+
+=query(Sheet1!A:D,CONCATENATE("select D where A='skill' and B=",B2,""))
+
+
+Which is a little messier to look at and use.
+
 */
 
 
