@@ -23,114 +23,92 @@ https://docs.google.com/spreadsheets/d/12abDsXyq-Lj_yctkmCY0moZYUVC8gTRWnPC9Z02O
 
 */
 
-function loadRegionPrices(priceIDs,regionID,cachebuster){
-  if (typeof regionID == 'undefined'){
-    regionID=10000002;
-  }
-  if (typeof priceIDs == 'undefined'){
-    throw 'need typeids';
-  }
-  if (typeof cachebuster == 'undefined'){
-    cachebuster=1;
-  }
-  var prices = new Array();
-  var dirtyTypeIds = new Array();
-  var cleanTypeIds = new Array();
-  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&regionlimit="+regionID+"&typeid=";
-  priceIDs.forEach (function (row) {
-    row.forEach ( function (cell) {
-      if (typeof(cell) === 'number' ) {
-        dirtyTypeIds.push(cell);
-      }
-    });
-  });
-  cleanTypeIds = dirtyTypeIds.filter(function(v,i,a) {
-    return a.indexOf(v)===i;
-  });
+function loadMarketOrders(type, keyID, vCode, characterID){
+  var moment = Moment.load()
+  var orders= new Array();
+  var url = "https://api.eveonline.com/"+type+"/MarketOrders.xml.aspx?keyID="+keyID+"&vCode="+vCode+"&characterID="+characterID;
   var parameters = {method : "get", payload : ""};
-  
-  var i,j,temparray,chunk = 100;
-  for (i=0,j=cleanTypeIds.length; i < j; i+=chunk) {
-    temparray = cleanTypeIds.slice(i,i+chunk);
-    var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
-    var xml = XmlService.parse(xmlFeed);
-    if(xml) {
-      var rows=xml.getRootElement().getChild("marketstat").getChildren("type");
-      for(var i = 0; i < rows.length; i++) {
-        var price=[parseInt(rows[i].getAttribute("id").getValue()),
-                   parseInt(rows[i].getChild("buy").getChild("volume").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("avg").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("max").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("min").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("stddev").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("median").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("percentile").getValue()),
-                   parseInt(rows[i].getChild("sell").getChild("volume").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("avg").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("max").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("min").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("stddev").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("median").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("percentile").getValue())];
-        prices.push(price);
-      }
+  var xmlFeed = UrlFetchApp.fetch(url, parameters).getContentText();
+  var xml = XmlService.parse(xmlFeed);
+  if(xml) {
+    var rows=xml.getRootElement().getChild("result").getChild("rowset").getChildren("row");
+    for(var i = 0; i < rows.length; i++) {
+      order=[rows[i].getAttribute("orderID").getValue(),
+                 rows[i].getAttribute("charID").getValue(),
+                 rows[i].getAttribute("stationID").getValue(),
+                 parseInt(rows[i].getAttribute("volEntered").getValue()),
+                 parseInt(rows[i].getAttribute("volRemaining").getValue()),
+                 parseInt(rows[i].getAttribute("minVolume").getValue()),
+                 rows[i].getAttribute("orderState").getValue(),
+                 rows[i].getAttribute("typeID").getValue(),
+                 parseInt(rows[i].getAttribute("range").getValue()),
+                 rows[i].getAttribute("accountKey").getValue(),
+                 rows[i].getAttribute("duration").getValue(),
+                 parseFloat(rows[i].getAttribute("escrow").getValue()),
+                 parseFloat(rows[i].getAttribute("price").getValue()),
+                 rows[i].getAttribute("bid").getValue(),
+                 rows[i].getAttribute("issued").getValue(),
+             moment(rows[i].getAttribute("issued").getValue(),"YYYY-MM-DD HH:mm:ss").add('days',parseInt(rows[i].getAttribute("duration").getValue())).format("YYYY-MM-DD HH:mm:ss")
+            ];
+      orders.push(order);
     }
   }
-  return prices;
+  return orders;
 }
 
-function loadSystemPrices(priceIDs,systemID,cachebuster){
-  if (typeof systemID == 'undefined'){
-    regionID=30000142;
-  }
-  if (typeof priceIDs == 'undefined'){
-    throw 'need typeids';
-  }
-  if (typeof cachebuster == 'undefined'){
-    cachebuster=1;
-  }
-  var prices = new Array();
-  var dirtyTypeIds = new Array();
-  var cleanTypeIds = new Array();
-  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&usesystem="+regionID+"&typeid=";
-  priceIDs.forEach (function (row) {
-    row.forEach ( function (cell) {
-      if (typeof(cell) === 'number' ) {
-        dirtyTypeIds.push(cell);
-      }
-    });
-  });
-  cleanTypeIds = dirtyTypeIds.filter(function(v,i,a) {
-    return a.indexOf(v)===i;
-  });
+
+
+
+function loadMarketOrdersResolved(type, keyID, vCode, characterID){
+  var moment = Moment.load()
+  var orders= new Array();
+  var url = "https://api.eveonline.com/"+type+"/MarketOrders.xml.aspx?keyID="+keyID+"&vCode="+vCode+"&characterID="+characterID;
   var parameters = {method : "get", payload : ""};
+  var xmlFeed = UrlFetchApp.fetch(url, parameters).getContentText();
+  var xml = XmlService.parse(xmlFeed);
   
-  var i,j,temparray,chunk = 100;
-  for (i=0,j=cleanTypeIds.length; i < j; i+=chunk) {
-    temparray = cleanTypeIds.slice(i,i+chunk);
-    var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
-    var xml = XmlService.parse(xmlFeed);
-    if(xml) {
-      var rows=xml.getRootElement().getChild("marketstat").getChildren("type");
-      for(var i = 0; i < rows.length; i++) {
-        var price=[parseInt(rows[i].getAttribute("id").getValue()),
-                   parseInt(rows[i].getChild("buy").getChild("volume").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("avg").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("max").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("min").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("stddev").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("median").getValue()),
-                   parseFloat(rows[i].getChild("buy").getChild("percentile").getValue()),
-                   parseInt(rows[i].getChild("sell").getChild("volume").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("avg").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("max").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("min").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("stddev").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("median").getValue()),
-                   parseFloat(rows[i].getChild("sell").getChild("percentile").getValue())];
-        prices.push(price);
-      }
+  
+  var orderStates = {0:'Open',1:'Closed',2:'Expired/fulfilled',3:'Cancelled',4:'Pending',5:'Character Deleted'};
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var stationSheet = ss.getSheetByName("station");
+  var typeidSheet = ss.getSheetByName("typeid");
+
+  var stations=stationSheet.getDataRange().getValues();
+  var stationArray = new Array();
+  for(var i = 0; i < stations.length; i++) {
+    var key = stations[i][0]+'_';
+    stationArray[key] = stations[i][1];
+  }
+  
+  var typeids=typeidSheet.getDataRange().getValues();
+  var typeidArray = new Array();
+  for(var i = 0; i < typeids.length; i++) {
+    var key = typeids[i][0]+'_';
+    typeidArray[key] = typeids[i][1];
+  }
+  
+  if(xml) {
+    var rows=xml.getRootElement().getChild("result").getChild("rowset").getChildren("row");
+    for(var i = 0; i < rows.length; i++) {
+      order=[rows[i].getAttribute("orderID").getValue(),
+                 rows[i].getAttribute("charID").getValue(),
+                 stationArray[rows[i].getAttribute("stationID").getValue()+'_'],
+                 parseInt(rows[i].getAttribute("volEntered").getValue()),
+                 parseInt(rows[i].getAttribute("volRemaining").getValue()),
+                 parseInt(rows[i].getAttribute("minVolume").getValue()),
+                 orderStates[rows[i].getAttribute("orderState").getValue()],
+                 typeidArray[rows[i].getAttribute("typeID").getValue()+'_'],
+                 parseInt(rows[i].getAttribute("range").getValue()),
+                 rows[i].getAttribute("accountKey").getValue(),
+                 rows[i].getAttribute("duration").getValue(),
+                 parseFloat(rows[i].getAttribute("escrow").getValue()),
+                 parseFloat(rows[i].getAttribute("price").getValue()),
+             parseInt(rows[i].getAttribute("bid").getValue())?'Buy':'Sell',
+                 rows[i].getAttribute("issued").getValue(),
+             moment(rows[i].getAttribute("issued").getValue(),"YYYY-MM-DD HH:mm:ss").add('days',parseInt(rows[i].getAttribute("duration").getValue())).format("YYYY-MM-DD HH:mm:ss")
+            ];
+      orders.push(order);
     }
   }
-  return prices;
+  return orders;
 }
