@@ -56,9 +56,9 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
   });
   var parameters = {method : "get", payload : ""};
   
-  var i,j,temparray,chunk = 100;
-  for (i=0,j=cleanTypeIds.length; i < j; i+=chunk) {
-    temparray = cleanTypeIds.slice(i,i+chunk);
+  var o,j,temparray,chunk = 100;
+  for (o=0,j=cleanTypeIds.length; o < j; o+=chunk) {
+    temparray = cleanTypeIds.slice(o,o+chunk);
     var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
     var xml = XmlService.parse(xmlFeed);
     if(xml) {
@@ -88,7 +88,7 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
 
 function loadSystemPrices(priceIDs,systemID,cachebuster){
   if (typeof systemID == 'undefined'){
-    regionID=30000142;
+    systemID=30000142;
   }
   if (typeof priceIDs == 'undefined'){
     throw 'need typeids';
@@ -99,7 +99,7 @@ function loadSystemPrices(priceIDs,systemID,cachebuster){
   var prices = new Array();
   var dirtyTypeIds = new Array();
   var cleanTypeIds = new Array();
-  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&usesystem="+regionID+"&typeid=";
+  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&usesystem="+systemID+"&typeid=";
   priceIDs.forEach (function (row) {
     row.forEach ( function (cell) {
       if (typeof(cell) === 'number' ) {
@@ -112,9 +112,9 @@ function loadSystemPrices(priceIDs,systemID,cachebuster){
   });
   var parameters = {method : "get", payload : ""};
   
-  var i,j,temparray,chunk = 100;
-  for (i=0,j=cleanTypeIds.length; i < j; i+=chunk) {
-    temparray = cleanTypeIds.slice(i,i+chunk);
+  var o,j,temparray,chunk = 100;
+  for (o=0,j=cleanTypeIds.length; o < j; o+=chunk) {
+    temparray = cleanTypeIds.slice(o,o+chunk);
     var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
     var xml = XmlService.parse(xmlFeed);
     if(xml) {
