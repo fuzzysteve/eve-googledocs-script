@@ -49,6 +49,10 @@ function loadJobs(type, keyID, vCode, characterID,history){
         historyurl='History';
   }
   var jobs= new Array();
+  jobs.push(["jobID","installerID","installerName","facilityID","solarSystemID","solarSystemName","stationID","activityID","blueprintID","blueprintTypeID","blueprintTypeName"
+       ,"blueprintLocationID","outputLocationID","runs","successfulRuns","cost","teamID","licensedRuns","probability","productTypeID","productTypeName","status","timeInSeconds",
+       "startDate","endDate","pauseDate","completedDate","completedCharacterID"]);
+  status={1:"Active",2:"Paused",3:"Ready",101:"Delivered",102:"Cancelled",103:"Reverted"};
   var url = "https://api.eveonline.com/"+type+"/IndustryJobs"+historyurl+".xml.aspx?keyID="+keyID+"&vCode="+vCode+"&characterID="+characterID;
   var parameters = {method : "get", payload : ""};
   var xmlFeed = UrlFetchApp.fetch(url, parameters).getContentText();
@@ -77,8 +81,8 @@ function loadJobs(type, keyID, vCode, characterID,history){
             parseInt(rows[i].getAttribute('licensedRuns').getValue()),
             rows[i].getAttribute('probability').getValue(),
             parseInt(rows[i].getAttribute('productTypeID').getValue()),
-            parseInt(rows[i].getAttribute('productTypeName').getValue()),
-            parseInt(rows[i].getAttribute('status').getValue()),
+            rows[i].getAttribute('productTypeName').getValue(),
+            status[parseInt(rows[i].getAttribute('status').getValue())],
             parseInt(rows[i].getAttribute('timeInSeconds').getValue()),
             rows[i].getAttribute('startDate').getValue(),
             rows[i].getAttribute('endDate').getValue(),
