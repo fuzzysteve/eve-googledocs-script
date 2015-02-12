@@ -5,7 +5,11 @@ https://docs.google.com/spreadsheets/d/1d3ixNx5hF5kfj2Zl3g46ODi3mqrb-AB7FDz4p4_8
 
 
 */
-
+/**
+* Creates a table of outpost information from the EVE API.
+* @return A table with columns of information in the following order: station ID, station name, station TypeID, solar system ID, owning corporation ID, owning corporation name.
+* @customfunction
+*/
 function loadOutposts(){
   var outposts= new Array();
   var url = "https://api.eveonline.com/eve/ConquerableStationList.xml.aspx";
