@@ -10,7 +10,15 @@ It's 'blueprint ID','location ID','Typeid of blueprint','name of blueprint','whi
 'quantity. -2 for a BPC, -1 for a BPO, a number for stacked BPOs',TE,ME,'runs, -1 for a BPO'
 
 */
-
+/**
+* Creates a table of information on blueprints retrieved from the EVE API.
+* @param {string} type This should be set to "char" or "corp" depending on the type of API key in use.
+* @param {number} keyID This should be set to the keyID given by your API key.
+* @param {string} vCode This should be set to the verification code given by your API key.
+* @param {number} characterID This should be set to the specific character for which you would like to retrieve the blueprint data.
+* @returns A table with information in the following order: 'blueprint ID','location ID','Typeid of blueprint','name of blueprint','which hangar it's in', 'quantity. -2 for a BPC, -1 for a BPO, a number for stacked BPOs',TE,ME,'runs, -1 for a BPO'
+* @customfunction
+*/
 function loadBlueprints(type, keyID, vCode, characterID){
   var blueprints= new Array();
   var url = "https://api.eveonline.com/"+type+"/Blueprints.xml.aspx?keyID="+keyID+"&vCode="+vCode+"&characterID="+characterID;

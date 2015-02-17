@@ -30,6 +30,14 @@ An example below:
 https://docs.google.com/spreadsheets/d/1f9-4cb4Tx64Do-xmHhELSwZGahZ2mTTkV7mKDBRPrrY/edit?usp=sharing
 
 */
+/*
+* Loads prices for a given set of typeIDs for a specific region using Eve-Central's data.
+* @param priceIDs A range where the item typeIDs are found.
+* @param regionID The region to query.
+* @param {number} cachebuster Increment this variable to refresh the data.
+* @return The price data in multiple columns in the following order: TypeID,Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell Percentile. This is suitable for use with VLOOKUP.
+* @customfunction
+*/
 function loadRegionPrices(priceIDs,regionID,cachebuster){
   if (typeof regionID == 'undefined'){
     regionID=10000002;
@@ -86,6 +94,14 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
   return prices;
 }
 
+/*
+* Loads prices for a given set of typeIDs for a specific region using Eve-Central's data.
+* @param priceIDs A range where the item typeIDs are found.
+* @param systemID The system to query.
+* @param {number} cachebuster Increment this variable to refresh the data.
+* @return The price data in multiple columns in the following order: TypeID,Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell Percentile. This is suitable for use with VLOOKUP.
+* @customfunction
+*/
 function loadSystemPrices(priceIDs,systemID,cachebuster){
   if (typeof systemID == 'undefined'){
     systemID=30000142;
