@@ -3,20 +3,21 @@
 Takes a bunch of typeids from a list (duplicates are fine. multidimensional is fine) and returns a bunch of rows 
 with relevant price data.
 
-TypeID,Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,
-Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell Percentile
+TypeID,
+Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,
+Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,Sell Percentile
 
 
 
-I'd suggest loading price data into a new sheet, then using vlookup to get the bits you care about in your main sheet.
+I'd suggest loading price data into a new sheet, then using index+match or vlookup to get the bits you care about in your main sheet.
 
 loadRegionPrices defaults to the Forge
 loadSystemPrices defaults to Jita
 
 
 =loadRegionPrices(A1:A28)
-=loadRegionPrices(A1:A28,10000002)
-=loadRegionPrices(A1:A28,10000002,47)
+=loadRegionPrices(A1:A28,1,10000002)
+=loadRegionPrices(A1:A28,1,10000002,47)
 
 =loadSystemPrices(A1:A28)
 
@@ -25,25 +26,30 @@ loadSystemPrices defaults to Jita
 
 
 
-An example below:
+Examples below:
 
 https://docs.google.com/spreadsheets/d/1f9-4cb4Tx64Do-xmHhELSwZGahZ2mTTkV7mKDBRPrrY/edit?usp=sharing
+https://docs.google.com/spreadsheets/d/1ZvKpokdUa3prXNXU-9JJ19eGOBKYe7YvIXyTaxPf5W0/edit?usp=sharing
 
 */
 /*
 * Loads prices for a given set of typeIDs for a specific region using Eve-Central's data.
 * @param priceIDs A range where the item typeIDs are found.
+* @param includeheaders Returns a row with headers for each column.
 * @param regionID The region to query.
 * @param {number} cachebuster Increment this variable to refresh the data.
 * @return The price data in multiple columns in the following order: TypeID,Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell Percentile. This is suitable for use with VLOOKUP.
 * @customfunction
 */
-function loadRegionPrices(priceIDs,regionID,cachebuster){
-  if (typeof regionID == 'undefined'){
-    regionID=10000002;
-  }
+function loadRegionPrices(priceIDs,includeheaders,regionID,cachebuster){
   if (typeof priceIDs == 'undefined'){
     throw 'need typeids';
+  }
+  if (typeof includeheaders == 'undefined'){
+    includeheaders=0;
+  }
+  if (typeof regionID == 'undefined'){
+    regionID=10000002;
   }
   if (typeof cachebuster == 'undefined'){
     cachebuster=1;
@@ -67,9 +73,12 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
   var o,j,temparray,chunk = 100;
   for (o=0,j=cleanTypeIds.length; o < j; o+=chunk) {
     temparray = cleanTypeIds.slice(o,o+chunk);
-    var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
+    var xmlFeed = UrlFetchApp.fetch(url+temparray.join(","), parameters).getContentText();
     var xml = XmlService.parse(xmlFeed);
     if(xml) {
+      if (includeheaders === 1){
+        prices.push(["TypeID","Buy Volume","Buy average","Buy max","Buy min","Buy Std deviation","Buy median","Buy Percentile","Sell Volume","Sell Average","Sell Max","Sell Min","Sell std Deviation","Sell Median","Sell Percentile"]);
+      }
       var rows=xml.getRootElement().getChild("marketstat").getChildren("type");
       for(var i = 0; i < rows.length; i++) {
         var price=[parseInt(rows[i].getAttribute("id").getValue()),
@@ -97,17 +106,21 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
 /*
 * Loads prices for a given set of typeIDs for a specific region using Eve-Central's data.
 * @param priceIDs A range where the item typeIDs are found.
+* @param includeheaders Returns a row with headers for each column.
 * @param systemID The system to query.
 * @param {number} cachebuster Increment this variable to refresh the data.
-* @return The price data in multiple columns in the following order: TypeID,Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,sell Percentile. This is suitable for use with VLOOKUP.
+* @return The price data in multiple columns in the following order: TypeID,Buy Volume,Buy average,Buy max,Buy min,Buy Std deviation,Buy median,Buy Percentile,Sell Volume,Sell Average,Sell Max,Sell Min,Sell std Deviation,Sell Median,Sell Percentile. This is suitable for use with VLOOKUP.
 * @customfunction
 */
-function loadSystemPrices(priceIDs,systemID,cachebuster){
-  if (typeof systemID == 'undefined'){
-    systemID=30000142;
-  }
+function loadSystemPrices(priceIDs,includeheaders,systemID,cachebuster){
   if (typeof priceIDs == 'undefined'){
     throw 'need typeids';
+  }
+  if (typeof includeheaders == 'undefined'){
+    includeheaders=0;
+  }
+  if (typeof systemID == 'undefined'){
+    systemID=30000142;
   }
   if (typeof cachebuster == 'undefined'){
     cachebuster=1;
@@ -131,8 +144,12 @@ function loadSystemPrices(priceIDs,systemID,cachebuster){
   var o,j,temparray,chunk = 100;
   for (o=0,j=cleanTypeIds.length; o < j; o+=chunk) {
     temparray = cleanTypeIds.slice(o,o+chunk);
-    var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
+    var xmlFeed = UrlFetchApp.fetch(url+temparray.join(","), parameters).getContentText();    
+
     var xml = XmlService.parse(xmlFeed);
+    if (includeheaders === 1){
+      prices.push(["TypeID","Buy Volume","Buy average","Buy max","Buy min","Buy Std deviation","Buy median","Buy Percentile","Sell Volume","Sell Average","Sell Max","Sell Min","Sell std Deviation","Sell Median","Sell Percentile"]);
+    }
     if(xml) {
       var rows=xml.getRootElement().getChild("marketstat").getChildren("type");
       for(var i = 0; i < rows.length; i++) {
