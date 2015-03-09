@@ -67,6 +67,7 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
   var o,j,temparray,chunk = 100;
   for (o=0,j=cleanTypeIds.length; o < j; o+=chunk) {
     temparray = cleanTypeIds.slice(o,o+chunk);
+    Utilities.sleep(100);
     var xmlFeed = UrlFetchApp.fetch(url+temparray.join("&typeid="), parameters).getContentText();
     var xml = XmlService.parse(xmlFeed);
     if(xml) {
