@@ -24,7 +24,7 @@ function office2station(locationID) {
 
 }
 
-function parseAssets(rows, parent, locationID, items, stations, location) {
+function parseAssets(rows, parent, locationID, location) {
 	for (var i = 0; i < rows.length; i++) {
 		rawQuantity = null;
 
