@@ -23,6 +23,18 @@ function loadAllVolumes(typeID,regionID){
   return volumes;
 }
 
+
+function zeroFill( number, width )
+{
+  width -= number.toString().length;
+  if ( width > 0 )
+  {
+    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+  }
+  return number + ""; // always return a string
+}
+
+
 function loadVolume(typeID,regionID){
   if (typeof regionID == 'undefined'){
     regionID=10000002;
@@ -42,7 +54,7 @@ function loadVolume(typeID,regionID){
   var d = new Date();
   d.setDate(d.getDate() - 1);
   month=d.getMonth()+1;
-  yesterday=d.getFullYear()+"-"+month+"-"+d.getDate()+"T00:00:00";
+  yesterday=d.getFullYear()+"-"+zeroFill(month,2)+"-"+zeroFill(d.getDate(),2)+"T00:00:00";
   
     if (data) {
     for (var i = 0; i < data.items.length; i++) {
