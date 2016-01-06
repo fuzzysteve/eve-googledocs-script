@@ -66,3 +66,40 @@ function loadVolume(typeID,regionID){
   
   return volumes;
 }
+
+
+
+function loadThirtyDayVolume(typeID,regionID){
+  if (typeof regionID == 'undefined'){
+    regionID=10000002;
+  }
+  if (typeof typeID == 'undefined'){
+    throw 'need typeid';
+  }
+
+  var prices = new Array();
+  var url="https://public-crest.eveonline.com/market/"+regionID+"/types/"+typeID+"/history/";
+  
+  var parameters = {method : "get", payload : ""};
+  var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
+  var volumes = new Array();
+  
+  data = JSON.parse(jsonFeed)
+  var d = new Date();
+  time=Date.UTC(d.getFullYear(),d.getMonth()+1,d.getDate())
+  from = time - 2.592e+9
+ 
+    if (data) {
+    for (var i = 0; i < data.items.length; i++) {
+      year=data.items[i].date.substring(0,4)
+      month=data.items[i].date.substring(5,7)
+      day=data.items[i].date.substring(8,10)
+      
+      if (Date.UTC(year,month,day) >= from) {
+       volumes.push(data.items[i].volume)
+      }
+    }
+  }
+  
+  return volumes;
+}
