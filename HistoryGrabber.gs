@@ -11,6 +11,7 @@ function loadAllVolumes(typeID,regionID){
   
   var parameters = {method : "get", payload : ""};
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
+  data = JSON.parse(jsonFeed)
   var volumes = new Array();
   
   if (data) {
