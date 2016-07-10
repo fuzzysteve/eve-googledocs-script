@@ -1,3 +1,6 @@
+// Requires a list of typeids, so something like Types!A:A
+// https://docs.google.com/spreadsheets/d/1IixV0eNqg19FE6cLzb83G1Ucb0Otl-Jnvm6csAlPKwo/edit?usp=sharing for an example
+
 function loadRegionAggregates(priceIDs,regionID){
   if (typeof regionID == 'undefined'){
     regionID=10000002;
