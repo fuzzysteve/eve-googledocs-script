@@ -94,7 +94,7 @@ function getCitadel(citadelid) {
       var price=[json[i].duration,
                  json[i].is_buy_order,
                  json[i].issued,
-                 json[i].locationid,
+                 json[i].location_id,
                  json[i].min_volume,
                  json[i].order_id,
                  json[i].price,
