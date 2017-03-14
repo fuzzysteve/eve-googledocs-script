@@ -29,12 +29,15 @@ function getSetup() {
    }
 
  }
-   return config;
+ var documentProperties = PropertiesService.getDocumentProperties();
+ config.expires = documentProperties.getProperty('oauth_expires');
+ config.access_token = documentProperties.getProperty('access_token')
+ return config;
 }
 
 function getAccessToken(config) {
   
-  
+  if (Date.now()>config.expires) {
 
   var url = 'https://login.eveonline.com/oauth/token?'
     + 'grant_type=refresh_token'
@@ -56,7 +59,12 @@ function getAccessToken(config) {
   
   config.access_token=access_token;
   config.expires=Date.now()+1200000
- 
+  var documentProperties = PropertiesService.getDocumentProperties();
+  documentProperties.setProperty('access_token',access_token)
+  documentProperties.setProperty('oauth_expires',config.expires)
+  
+  
+  }
 
   return config;
   
