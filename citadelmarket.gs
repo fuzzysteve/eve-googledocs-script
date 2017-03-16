@@ -99,7 +99,7 @@ function getCitadel(citadelid) {
                  json[i].order_id,
                  json[i].price,
                  json[i].range,
-                 json[i].typeid,
+                 json[i].type_id,
                  json[i].volume_remain,
                  json[i].volume_total
                 ];
