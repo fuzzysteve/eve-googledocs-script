@@ -2,6 +2,7 @@
 // Do not store _anything_ you care about on prices, as it will be wiped each time the function runs.
 // Typeids has a single column, with the regionid you want to retrieve at the top, then followed by the typeids.
 
+// https://docs.google.com/spreadsheets/d/12eBW3OmmyrpYBTdc2NzAjtn0vPDlUr8pCVMcF3PLMIk/edit?usp=sharing for an example
 
 
 // This adds a new menu to the sheet, with a single entry to update prices.
@@ -64,6 +65,7 @@ function updatePrices(){
     var json = JSON.parse(jsonFeed);
     if(json) {
       for(i in json) {
+        // Add each result to the sheet.
         resultsheet.appendRow([parseInt(i),
                    parseInt(json[i].buy.volume),
                    parseInt(json[i].buy.weightedAverage),
