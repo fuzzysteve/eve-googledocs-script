@@ -1,3 +1,10 @@
+// This code depends on having two sheets. One called prices, one called typeids.
+// Do not store _anything_ you care about on prices, as it will be wiped each time the function runs.
+// Typeids has a single column, with the regionid you want to retrieve at the top, then followed by the typeids.
+
+
+
+// This adds a new menu to the sheet, with a single entry to update prices.
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   ui.createMenu('API')
