@@ -3,7 +3,6 @@ function onOpen() {
   ui.createMenu('API')
       .addItem('Update Prices', 'updatePrices')
       .addToUi();
-  updatePrices();
 }
 
 
