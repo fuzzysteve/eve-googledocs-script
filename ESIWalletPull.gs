@@ -20,8 +20,9 @@ typeids should have a list of the typeids for market types, in the form typeid, 
 
 Config should be set up as per the blog post (with the named ranges and so on). The refresh token will need to be set up for the character wallet scope.
 
-Once that's all done, you can add the code below to the script editor, then reopen the sheet. It should have a new API menu item
-which has an update wallet bit. new entries go to the bottom (but you can sort at will)
+Once that's all done, you can add the code below to the script editor, 
+edit the two character ids (CHARACTERIDGOESHERE) to be the right character, then reopen the sheet. 
+It should have a new API menu item which has an update wallet bit. new entries go to the bottom (but you can sort at will)
 
 */
 
@@ -131,7 +132,7 @@ function updateWallet() {
     typeidArray[key] = typeids[i][1];
   }
   
-  var url = 'https://esi.tech.ccp.is/latest/characters/90926985/wallet/transactions/?datasource=tranquility';
+  var url = 'https://esi.tech.ccp.is/latest/characters/CHARACTERIDGOESHERE/wallet/transactions/?datasource=tranquility';
   
   //transactions
   
@@ -167,7 +168,7 @@ function updateWallet() {
   }
   
 
-  var url = 'https://esi.tech.ccp.is/latest/characters/90926985/wallet/journal/?datasource=tranquility';
+  var url = 'https://esi.tech.ccp.is/latest/characters/CHARACTERIDGOESHERE/wallet/journal/?datasource=tranquility';
   newmax=0;
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
   var json = JSON.parse(jsonFeed);
