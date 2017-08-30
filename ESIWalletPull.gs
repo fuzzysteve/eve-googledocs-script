@@ -201,7 +201,7 @@ function updateWallet() {
         }
       }
     }
-    if (newmax>config.maxjournalnid) {
+    if (newmax>config.maxjournalid) {
       var documentProperties = PropertiesService.getDocumentProperties();
       documentProperties.setProperty('maxjournalid',newmax)
     }
