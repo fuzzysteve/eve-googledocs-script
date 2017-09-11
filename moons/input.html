@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script>
+    function parsedata(){
+      var addA = document.getElementById('inputbox').value;
+      google.script.run.withSuccessHandler(close).processMoon(addA);
+    }
+
+    function close(){
+      google.script.host.close();
+    }
+    </script>
+  </head>
+  <body>
+    <textarea id="inputbox" rows=15 cols=30></textarea>
+    <input type="button" value="Process" style="margin-top: 20px" onclick="parsedata();" />
+  </body>
+</html>
+
+
