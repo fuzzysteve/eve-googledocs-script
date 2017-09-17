@@ -65,7 +65,7 @@ function processMoon(moondata) {
       if (oreArray[i][0] === " ") {
          ore=oreArray[i].trim();
          m=orere.exec(ore);
-         ore=[m[1].m[2]];
+         ore=[m[1],m[2]];
           if (pivot) {
               row=row.concat(ore);
           } else {
