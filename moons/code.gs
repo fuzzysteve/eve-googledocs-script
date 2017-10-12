@@ -56,16 +56,19 @@ function processMoon(moondata) {
   var moonsheet = ss.getSheetByName("moons");
 
   oreArray = moondata.match(/[^\r\n]+/g);
-  var orere=/(.*)\s+([\d\.]+)$/;
+  var orere=/(.*)[\t\s]+([\d\.]+)[\t\s]+(\d+)[\t\s]+(\d+)[\t\s]+(\d+)[\s\t]+(\d+)$/;
   planet="";
   pivot=0;
   row=new Array();
   start=1;
   for (var i = 0, len = oreArray.length; i < len; i++) {
-      if (oreArray[i][0] === " ") {
-         ore=oreArray[i].trim();
+    if (oreArray[i].substring(0,4) === "Moon") {
+       continue;
+    }
+      if (oreArray[i][0] === " " || oreArray[i][0] === "\t") {
+         ore=oreArray[i].trim().trim("\t");
          m=orere.exec(ore);
-         ore=[m[1],m[2]];
+         ore=[m[1],m[2],m[3],m[4],m[5]];
           if (pivot) {
               row=row.concat(ore);
           } else {
