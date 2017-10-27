@@ -76,7 +76,7 @@ function processMoon(e) {
   moondata=e.namedValues['Moon data'][0]
 
   oreArray = moondata.match(/[^\r\n]+/g);
-  var orere=/(.*)[\t\s]+([\d\.]+)[\t\s]+(\d+)[\t\s]+(\d+)[\t\s]+(\d+)[\s\t]+(\d+)$/;
+  var orere=/^\W*(\w+?\s?\w+?)\W+([\d.]+)\W+(\d+)\W+(\d+)\W+(\d+)\W+(\d+)\W*$/;
   planet="";
   pivot=0;
   row=new Array();
