@@ -51,7 +51,7 @@ function loadRegionPrices(priceIDs,regionID,cachebuster){
   var prices = new Array();
   var dirtyTypeIds = new Array();
   var cleanTypeIds = new Array();
-  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&regionlimit="+regionID+"&typeid=";
+  var url="https://api.evemarketer.com/ec/marketstat?cachebuster="+cachebuster+"&regionlimit="+regionID+"&typeid=";
   priceIDs.forEach (function (row) {
     row.forEach ( function (cell) {
       if (typeof(cell) === 'number' ) {
@@ -116,7 +116,7 @@ function loadSystemPrices(priceIDs,systemID,cachebuster){
   var prices = new Array();
   var dirtyTypeIds = new Array();
   var cleanTypeIds = new Array();
-  var url="http://api.eve-central.com/api/marketstat?cachebuster="+cachebuster+"&usesystem="+systemID+"&typeid=";
+  var url="https://api.evemarketer.com/ec/marketstat?cachebuster="+cachebuster+"&regionlimit="+regionID+"&typeid=";
   priceIDs.forEach (function (row) {
     row.forEach ( function (cell) {
       if (typeof(cell) === 'number' ) {
