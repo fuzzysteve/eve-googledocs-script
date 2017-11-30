@@ -7,7 +7,7 @@ function loadAllVolumes(typeID,regionID){
   }
 
   var prices = new Array();
-  var url="https://public-crest.eveonline.com/market/"+regionID+"/types/"+typeID+"/history/";
+  var url="https://crest-tq.eveonline.com/market/"+regionID+"/history/?type=https://crest-tq.eveonline.com/inventory/types/"+typeID+"/";
   
   var parameters = {method : "get", payload : ""};
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
@@ -44,7 +44,7 @@ function loadVolume(typeID,regionID){
   }
 
   var prices = new Array();
-  var url="https://public-crest.eveonline.com/market/"+regionID+"/types/"+typeID+"/history/";
+  var url="https://crest-tq.eveonline.com/market/"+regionID+"/history/?type=https://crest-tq.eveonline.com/inventory/types/"+typeID+"/";
   
   var parameters = {method : "get", payload : ""};
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
@@ -78,7 +78,7 @@ function loadThirtyDayVolume(typeID,regionID){
   }
 
   var prices = new Array();
-  var url="https://public-crest.eveonline.com/market/"+regionID+"/types/"+typeID+"/history/";
+  var url="https://crest-tq.eveonline.com/market/"+regionID+"/history/?type=https://crest-tq.eveonline.com/inventory/types/"+typeID+"/";
   
   var parameters = {method : "get", payload : ""};
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
