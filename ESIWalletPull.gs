@@ -136,7 +136,7 @@ function updateWallet() {
     typeidArray[key] = typeids[i][1];
   }
   
-  var url = 'https://esi.tech.ccp.is/latest/characters/CHARACTERIDGOESHERE/wallet/transactions/?datasource=tranquility';
+  var url = 'https://esi.evetech.net/latest/characters/CHARACTERIDGOESHERE/wallet/transactions/?datasource=tranquility';
   
   //transactions
   
@@ -172,7 +172,7 @@ function updateWallet() {
   }
   
 
-  var url = 'https://esi.tech.ccp.is/latest/characters/CHARACTERIDGOESHERE/wallet/journal/?datasource=tranquility';
+  var url = 'https://esi.evetech.net/latest/characters/CHARACTERIDGOESHERE/wallet/journal/?datasource=tranquility';
   newmax=0;
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
   var json = JSON.parse(jsonFeed);
@@ -231,7 +231,7 @@ function updateCorpWallet() {
   }
   var parameters = {method : "get", headers : {'Authorization':'Bearer '+ config.access_token,'X-User-Agent':'Steve Ronuken Wallet Updater'}};
   
-  var url = 'https://esi.tech.ccp.is/latest/corporations/CORPIDGOESHERE/wallets/1/transactions/?datasource=tranquility';
+  var url = 'https://esi.evetech.net/latest/corporations/CORPIDGOESHERE/wallets/1/transactions/?datasource=tranquility';
   
   //transactions
   
@@ -265,7 +265,7 @@ function updateCorpWallet() {
     }
   }
 
-  url = 'https://esi.tech.ccp.is/latest/corporations/CORPIDGOESHERE/wallets/1/journal/?datasource=tranquility';
+  url = 'https://esi.evetech.net/latest/corporations/CORPIDGOESHERE/wallets/1/journal/?datasource=tranquility';
   newmax=0;
   var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
   var json = JSON.parse(jsonFeed);
