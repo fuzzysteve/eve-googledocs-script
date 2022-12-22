@@ -1,59 +1,109 @@
-// Requires a list of typeids, so something like Types!A:A
-// https://docs.google.com/spreadsheets/d/1IixV0eNqg19FE6cLzb83G1Ucb0Otl-Jnvm6csAlPKwo/edit?usp=sharing for an example
-
-function loadRegionAggregates(priceIDs,regionID){
-  if (typeof regionID == 'undefined'){
-    regionID=10000002;
-  }
-  if (typeof priceIDs == 'undefined'){
-    throw 'Need a list of typeids';
-  }
-
-  var prices = new Array();
-  var dirtyTypeIds = new Array();
-  var cleanTypeIds = new Array();
-  var url="https://market.fuzzwork.co.uk/aggregates/?region="+regionID+"&types="
-  
-  priceIDs.forEach (function (row) {
-    row.forEach ( function (cell) {
-     if (typeof(cell) === 'number' ) {
-        dirtyTypeIds.push(cell);
-      }
+/**
+ * Returns aggregated market data for given type IDs from https://market.fuzzwork.co.uk.
+ * @format
+ * @param {array} typeIds - A 2-dimensional array of type ID numbers
+ * @param {number | string} regionId - The ID number for the Region for which to get data
+ * @param {boolean} showHeaders - If true, the first "row" of the results will contain column headers
+ * @returns {array} prices 
+ */
+function loadRegionAggregates(
+  typeIds, 
+  regionId = 10000002,	
+  showHeaders = true
+) {
+  const prices = [];
+	try {
+		if (typeof typeIds === `undefined`) {
+			throw `Required variable, "typeIds" is not defined!`;
+		}
+    const dirtyTypeIds = [];
+		const url = `https://market.fuzzwork.co.uk/aggregates/?region=${regionId}&types=`;
+		const options = { method: `get`, payload: `` };
+    typeIds.forEach (row => {
+      row.forEach (cell => {
+        if (typeof cell === `number`) {
+          dirtyTypeIds.push(cell);
+        }
+      });
     });
+  const cleanTypeIds = dirtyTypeIds.filter((value, index , array) => {
+    return array.indexOf(value)===index;
   });
-  cleanTypeIds = dirtyTypeIds.filter(function(v,i,a) {
-    return a.indexOf(v)===i;
-  });
-  prices.push(['TypeID','Buy volume','Buy Weighted Average','Max Buy','Min Buy','Buy Std Dev','Median Buy','Percentile Buy Price','Sell volume','Sell Weighted Average','Max sell','Min Sell','Sell Std Dev','Median Sell','Percentile Sell Price'])
-  var parameters = {method : "get", payload : ""};
-  
-  var o,j,temparray,chunk = 100;
-  for (o=0,j=cleanTypeIds.length; o < j; o+=chunk) {
-    temparray = cleanTypeIds.slice(o,o+chunk);
-    Utilities.sleep(100);
-    var types=temparray.join(",").replace(/,$/,'')
-    var jsonFeed = UrlFetchApp.fetch(url+types, parameters).getContentText();
-    var json = JSON.parse(jsonFeed);
-    if(json) {
-      for(i in json) {
-        var price=[parseInt(i),
-                   parseInt(json[i].buy.volume),
-                   parseInt(json[i].buy.weightedAverage),
-                   parseFloat(json[i].buy.max),
-                   parseFloat(json[i].buy.min),
-                   parseFloat(json[i].buy.stddev),
-                   parseFloat(json[i].buy.median),
-                   parseFloat(json[i].buy.percentile),
-                   parseInt(json[i].sell.volume),
-                   parseFloat(json[i].sell.weightedAverage),
-                   parseFloat(json[i].sell.max),
-                   parseFloat(json[i].sell.min),
-                   parseFloat(json[i].sell.stddev),
-                   parseFloat(json[i].sell.median),
-                   parseFloat(json[i].sell.percentile)];
-        prices.push(price);
+		if (showHeaders) {
+			prices.push([
+        `Type ID`,
+				`Buy volume`,
+				`Buy Weighted Average`,
+				`Max Buy`,
+				`Min Buy`,
+				`Buy Std Dev`,
+				`Median Buy`,
+				`Percentile Buy Price`,
+				`Sell volume`,
+				`Sell Weighted Average`,
+				`Max sell`,
+				`Min Sell`,
+				`Sell Std Dev`,
+				`Median Sell`,
+				`Percentile Sell Price`
+			]);
+		}
+    function chunks(array, size = 100) {
+      try {
+        if (typeof array === `undefined`) {
+			    throw `Required variable, "array" is not defined!`;
+		    }
+        if (!array) return [];
+        const chunk = array.splice(0, size);
+        return (!chunk.length) 
+          ? array
+          : [chunk].concat(chunks(array, size)); 
+          ;   
+      }
+      catch (error) {
+      	// TODO (developer) Handle Exception
+		    console.error(
+			    `chunk({${typeof array}} ${array}, {${typeof size}} ${size}) failed with error: ${error.message}.`
+        );
       }
     }
+		chunks(cleanTypeIds, 100).forEach(chunk => {
+			Utilities.sleep(Math.random() * 200);
+			const urlTypes = chunk.join(',').replace(/,$/, '');
+			const json = JSON.parse(
+				UrlFetchApp.fetch(`${url}${urlTypes}`, options).getContentText()
+			);
+			if (json) {
+				chunk.forEach(entry => {
+					const price = [
+            parseInt(entry),
+						parseInt(json[entry].buy.volume),
+						parseInt(json[entry].buy.weightedAverage),
+						parseFloat(json[entry].buy.max),
+						parseFloat(json[entry].buy.min),
+						parseFloat(json[entry].buy.stddev),
+						parseFloat(json[entry].buy.median),
+						parseFloat(json[entry].buy.percentile),
+						parseInt(json[entry].sell.volume),
+						parseFloat(json[entry].sell.weightedAverage),
+						parseFloat(json[entry].sell.max),
+						parseFloat(json[entry].sell.min),
+						parseFloat(json[entry].sell.stddev),
+						parseFloat(json[entry].sell.median),
+						parseFloat(json[entry].sell.percentile)
+					];
+					prices.push(price);
+				});
+			}
+		});
+	} catch (error) {
+		// TODO (developer) Handle Exception
+		prices.push(error.message);
+    console.error(
+			`loadRegionAggregates({${typeof typeIds}} ${typeIds}, {${typeof regionId}} ${regionId}, {${typeof showHeaders}} ${showHeaders}) failed with error: ${error.message}.`
+    );
+	}
+  finally {
+ 		return prices;
   }
-  return prices;
 }
