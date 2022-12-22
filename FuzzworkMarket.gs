@@ -58,7 +58,7 @@ function loadRegionAggregates(
       } catch (error) {
         // TODO (developer) Handle Exception
         console.error(
-          `chunk({${typeof array}} ${array}, {${typeof size}} ${size}) failed with error: ${error.message
+          `chunks({${typeof array}} ${array}, {${typeof size}} ${size}) failed with error: ${error.message
           }.`
         );
       }
