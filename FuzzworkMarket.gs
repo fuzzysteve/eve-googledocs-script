@@ -24,7 +24,7 @@
  * @throws {Error} If dirtyTypeIds is falsey.
  */
 function loadRegionAggregates(
-  typeIds = false,
+  dirtyTypeIds = false,
   regionId = 10000002,
   showHeaders = true
 ) {
@@ -33,78 +33,69 @@ function loadRegionAggregates(
   const baseUrl = `https://market.fuzzwork.co.uk/aggregates/`;
   const options = { method: `get`, payload: `` };
 
-  if (!typeIds) {
+  if (!dirtyTypeIds)
     throw new Error(`Invalid "dirtyTypeIds" variable!`);
-  } else {
 
-    const typeIdCleaner = (dirtyTypeIds) => [
-      ...new Set(dirtyTypeIds
-        .flat(Infinity)
-        .filter(Number)
-        .sort((a, b) => a - b)
-      )
-    ];
-    const cleanTypeIds = typeIdCleaner(typeIds);
+  const cleanTypeIds = [...new Set(dirtyTypeIds
+    .flat(Infinity)
+    .filter(Number)
+    .sort((a, b) => a - b))];
+  (showHeaders) && prices.push([
+    `Type ID`,
 
-    if (showHeaders) {
+    `Buy Weighted Average`,
+    `Buy Median`,
+    `Buy Volume`,
+    `Buy Order Count`,
+    //`Lowest Bid`,
+    `Highest Bid`,
+    `Top 5% Average`,
+
+    `Sell Weighted Average`,
+    `Sell Median`,
+    `Sell Volume`,
+    `Sell Order Count`,
+    `Lowest Offer`,
+    //`Highest Offer`,
+    `Bottom 5% Average`
+  ]);
+
+  while (cleanTypeIds.length > 0) {
+    Utilities.sleep(Math.random() * 5000);
+
+    const chunkSize = Math.min(100, cleanTypeIds.length);
+
+    const typeChunk = cleanTypeIds.splice(0, chunkSize);
+    const encodedTypes = typeChunk.join(`,`);
+
+    const query = `?region=${regionId}&types=${encodedTypes}`;
+    const url = `${baseUrl}${query}`;
+
+    const json = JSON.parse(UrlFetchApp.fetch(url, options).getContentText());
+
+    typeChunk.forEach(type => {
+      const { buy, sell } = json[type];
       prices.push([
-        `Type ID`,
+        +type,
 
-        `Buy Weighted Average`,
-        `Buy Median`,
-        `Buy Volume`,
-        `Buy Order Count`,
-        //`Lowest Bid`,
-        `Highest Bid`,
-        `Top 5% Average`,
+        +buy.weightedAverage,
+        +buy.median,
+        +buy.volume,
+        +buy.orderCount,
+        //+buy.min,
+        +buy.max,
+        +buy.percentile,
 
-        `Sell Weighted Average`,
-        `Sell Median`,
-        `Sell Volume`,
-        `Sell Order Count`,
-        `Lowest Offer`,
-        //`Highest Offer`,
-        `Bottom 5% Average`
+        +sell.weightedAverage,
+        +sell.median,
+        +sell.volume,
+        +sell.orderCount,
+        +sell.min,
+        //+sell.max,
+        +sell.percentile
       ]);
-    }
-    
-    while (cleanTypeIds.length > 0) {
-      Utilities.sleep(Math.random() * 5000);
+    }); // end of "typeChunk.forEach"
+  } // end of "while" loop
 
-      const chunkSize = Math.min(100, cleanTypeIds.length);
-
-      const typeChunk = cleanTypeIds.splice(0, chunkSize);
-      const encodedTypes = typeChunk.join(`,`);
-
-      const query = `?region=${regionId}&types=${encodedTypes}`;
-      const url = `${baseUrl}${query}`;
-
-      const json = JSON.parse(UrlFetchApp.fetch(url, options).getContentText());
-
-      typeChunk.forEach(type => {
-        const { buy, sell } = json[type];
-        prices.push([
-          +type,
-
-          +buy.weightedAverage,
-          +buy.median,
-          +buy.volume,
-          +buy.orderCount,
-          //+buy.min,
-          +buy.max,
-          +buy.percentile,
-
-          +sell.weightedAverage,
-          +sell.median,
-          +sell.volume,
-          +sell.orderCount,
-          +sell.min,
-          //+sell.max,
-          +sell.percentile
-        ]);
-      });
-    }
-
-    return prices;
-  }
+  return prices;
 }
