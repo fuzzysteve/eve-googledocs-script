@@ -27,8 +27,10 @@ edit the two character ids (CHARACTERIDGOESHERE) to be the right character, edit
 It should have a new API menu item which has an update wallet bit. new entries go to the bottom (but you can sort at will)
 
 */
+// Define an object to store type IDs
 const typeidArray = {};
 
+// Function to create a custom menu in Google Sheets
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('API')
@@ -39,9 +41,11 @@ function onOpen() {
     .addToUi();
 }
 
+// Function to fetch setup data and OAuth configuration
 function getSetup() {
   const config = {};
   const namedRanges = SpreadsheetApp.getActiveSpreadsheet().getNamedRanges();
+  
   for (const namedRange of namedRanges) {
     switch (namedRange.getName()) {
       case 'clientid':
@@ -66,66 +70,47 @@ function getSetup() {
   return config;
 }
 
+// Function to get maximum IDs
 function getMax() {
   const documentProperties = PropertiesService.getDocumentProperties();
-  let maxid = documentProperties.getProperty('maxtransactionid');
-  SpreadsheetApp.getUi().alert('max transaction id is:' + maxid);
-  maxid = documentProperties.getProperty('maxjournalid');
-  SpreadsheetApp.getUi().alert('max journal id is:' + maxid);
-  maxid = documentProperties.getProperty('maxcorpjournalid');
-  SpreadsheetApp.getUi().alert('max corp journal id is:' + maxid);
+  const maxtransactionid = documentProperties.getProperty('maxtransactionid');
+  const maxjournalid = documentProperties.getProperty('maxjournalid');
+  const maxcorpjournalid = documentProperties.getProperty('maxcorpjournalid');
+  
+  // Display max IDs in an alert dialog
+  SpreadsheetApp.getUi().alert(`Max Transaction ID: ${maxtransactionid}\nMax Journal ID: ${maxjournalid}\nMax Corp Journal ID: ${maxcorpjournalid}`);
 }
 
+// Function to clear maximum IDs
 function clearMax() {
   const documentProperties = PropertiesService.getDocumentProperties();
+  
+  // Clear max IDs
   documentProperties.setProperty('maxtransactionid', 0);
+  documentProperties.setProperty('maxjournalid', 0);
+  documentProperties.setProperty('maxcorpjournalid', 0);
 }
 
-function getAccessToken(config) {
-  if (Date.now() > config.expires) {
-    const url = 'https://login.eveonline.com/oauth/token?' +
-      'grant_type=refresh_token' +
-      '&refresh_token=' + config.refreshtoken;
-
-    const code = Utilities.base64Encode(config.clientid + ':' + config.secret);
-
-    const headers = {
-      'Authorization': 'Basic ' + code,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    };
-    const parameters = {
-      'method': 'post',
-      'headers': headers,
-    };
-    const response = UrlFetchApp.fetch(url, parameters).getContentText();
-    const json = JSON.parse(response);
-    const access_token = json['access_token'];
-
-    config.access_token = access_token;
-    config.expires = Date.now() + 1200000;
-    const documentProperties = PropertiesService.getDocumentProperties();
-    documentProperties.setProperty('access_token', access_token);
-    documentProperties.setProperty('oauth_expires', config.expires);
-  }
-
-  return config;
-}
-
+// Function to fetch and update character wallet data
 function updateWallet(characterId) {
+  // Get OAuth configuration
   const config = getSetup();
   config.getAccessToken(config);
 
+  // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const transactionsheet = ss.getSheetByName('transactions');
   const journalsheet = ss.getSheetByName('journal');
   const typessheet = ss.getSheetByName('typeids');
 
+  // Fetch type IDs from the 'typeids' sheet
   const typeids = typessheet.getDataRange().getValues();
   for (const row of typeids) {
     const key = row[0];
     typeidArray[key] = row[1];
   }
 
+  // Define the URL for character wallet transactions
   const url = `https://esi.evetech.net/latest/characters/${characterId}/wallet/transactions/?datasource=tranquility`;
 
   const parameters = {
@@ -169,6 +154,7 @@ function updateWallet(characterId) {
     }
   }
 
+  // Define the URL for character wallet journal entries
   const journalUrl = `https://esi.evetech.net/latest/characters/${characterId}/wallet/journal/?datasource=tranquility`;
 
   newmax = 0;
@@ -216,15 +202,19 @@ function updateWallet(characterId) {
   }
 }
 
+// Function to fetch and update corporation wallet data
 function updateCorpWallet(corpId) {
+  // Get OAuth configuration
   const config = getSetup();
   config.getAccessToken(config);
 
+  // Get the active spreadsheet
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const transactionsheet = ss.getSheetByName('corptransactions');
   const journalsheet = ss.getSheetByName('corpjournal');
   const typessheet = ss.getSheetByName('typeids');
 
+  // Fetch type IDs from the 'typeids' sheet
   const typeids = typessheet.getDataRange().getValues();
   for (const row of typeids) {
     const key = row[0];
@@ -239,6 +229,7 @@ function updateCorpWallet(corpId) {
     }
   };
 
+  // Define the URL for corporation wallet transactions
   const url = `https://esi.evetech.net/latest/corporations/${corpId}/wallets/1/transactions/?datasource=tranquility`;
 
   let newmax = 0;
@@ -273,6 +264,7 @@ function updateCorpWallet(corpId) {
     }
   }
 
+  // Define the URL for corporation wallet journal entries
   const journalUrl = `https://esi.evetech.net/latest/corporations/${corpId}/wallets/1/journal/?datasource=tranquility`;
 
   newmax = 0;
