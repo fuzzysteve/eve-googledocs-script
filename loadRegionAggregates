@@ -1,0 +1,190 @@
+"use strict";
+
+// gets the script ID from ScriptApp API or an empty string...
+const SCRIPT_ID = ScriptApp?.getScriptId() || ""; // For the UA string...
+
+// replace with your email. It goes into the UA string as well...
+const USER_EMAIL = ""; // in case there is some problem...
+// Fuzzy Steve can try to help you solve it...
+
+//
+const config = {
+  batchSize: 100,
+  fetchOptions: {
+    "User-Agent": "Mozilla/5.0 (compatible;Google-Apps-Script;beanserver;"
+       +`+https://script.google.com;id:${SCRIPT_ID},email:${USER_EMAIL})`,
+    method: "get",
+    payload: ""
+  },
+  // comment out (//) any headers you don't want in the output
+  headers: [
+    //'Buy Min',
+    "Buy Max",
+    "Buy Volume",
+    "Buy Std Dev",
+    "Buy Median",
+    "Buy Percentile",
+    "Buy Weighted Average",
+
+
+    "Sell Min",
+    //'Sell Max',
+    "Sell Volume",
+    "Sell Median",
+    "Sell Std Dev",
+    "Sell Percentile",
+    "Sell Weighted Average"
+  ],
+  propertyMappings: {
+    max: /Max/i,
+    median: /Median/i,
+    min: /Min/i,
+    percentile: /Percentile/i,
+    stddev: /Std Dev/i,
+    volume: /Volume/i,
+    weightedAverage: /Weighted Average/i
+  }
+};
+
+/**
+ * Loads region aggregates from fuzzwork.co.uk for the given im type IDs.
+ *
+ * @param {number[]|string[]} priceIds - List of type IDs.
+ * @param {number} [regionId=10000002] - Region ID. Defaults to 10000002(The
+ * Forge)
+ * @param {boolean} [includeHeaders=true] - Whether to include headers in the
+ * result. Defaults to true.
+ * @returns {Array<Array<number|string>>} - Array of aggregated prices.
+ * @throws {string} - Throws an error if priceIds parameter is not defined.
+ */
+function loadRegionAggregates(
+  priceIds,
+  regionId = 10000002, // defaults to The Forge
+  includeHeaders = true // defaults to TRUE
+) {
+  try {
+    // Check if priceIds parameter is undefined
+    // or an empty array or a blank string
+    if (typeof priceIds === "undefined" || priceIds === [] || priceIds === "") {
+      throw("Required variable, 'priceIds' is not defined!"
+        + "Need a list of type IDs!");
+    }
+
+    // Map the headers to properties based on the defined property mappings
+    const properties = config.headers.map(item => {
+      const mapping = Object.entries(config.propertyMappings).find(
+        ([_, regex]) => regex.test(item)
+      );
+
+      const [propertyKey] = mapping && mapping;
+      // Extract the category key from the header
+      const categoryKey = item && item.split(" ")[0];
+
+      return mapping ? `${categoryKey.toLowerCase()}.${propertyKey}` : null;
+    });
+
+    /**
+     * @summary Fetches aggregates data from the API for the specified
+     * batches and region ID.
+     * @param {Array<Array<number|string>>} batches - Array of batches
+     * containing type IDs.
+     * @param {number} regionId - Region ID.
+     * @returns {Array<object>} - Array of fetched responses.
+     */
+    const fetchAggregatesData = (batches, regionId) => {
+      const domain = "https://market.fuzzwork.co.uk/";
+      const url = `${domain}aggregates/?region=${regionId}&types=`;
+      const { fetchOptions } = config;
+      const { fetchAll } = UrlFetchApp;
+
+      return fetchAll(
+        batches.map(batch => ({ url: url + batch.join(","), fetchOptions }))
+      );
+    };
+
+    /**
+     * @summary Returns an array of clean type IDs by removing duplicates
+     * and filtering out non-numeric values.
+     * @param {number[]|string[]} priceIds - List of type IDs.
+     * @returns {number[]} - Array of clean type IDs.
+     */
+    const getCleanTypeIds = priceIds =>
+      Array.from(new Set([priceIds].flat(Infinity).filter(Number)));
+
+    /**
+     * @summary Splits the array of type IDs into batches based on the
+     * predefined batch size.
+     * @param {number[]} typeIds - Array of type IDs.
+     * @returns {Array<Array<number>>} - Array of batches.
+     */
+    const splitIntoBatches = typeIds => {
+      const { batchSize } = config;
+
+      return Array.from(
+        { length: Math.ceil(typeIds.length / batchSize) },
+        (_, index) => {
+          const start = index * batchSize;
+          const end = start + batchSize;
+
+          return typeIds.slice(start, end);
+        }
+      );
+    };
+
+    /**
+     * @summary Processes the fetched responses and extracts the required data.
+     * @param {Array<object>} responses - Array of fetched responses.
+     * @param {number[]} typeIds - Array of type IDs.
+     * @returns {Array<object>} - Array of extracted data.
+     */
+    const processResponses = (responses, typeIds) => {
+      const extractedData = [];
+      responses.forEach((response, index) => {
+        const { batchSize } = config;
+        const { parse } = JSON;
+        const json = parse(response.getContentText());
+        if (json) {
+          const chunk = typeIds.slice(
+            index * batchSize,
+            (index + 1) * batchSize
+          );
+          chunk.forEach(entry => {
+            const data = json[entry];
+            const extractedEntry = properties.reduce((obj, prop) => {
+              if (prop) {
+                const [objectKey, propertyKey] = prop.split(".");
+                if (
+                  data &&
+                  data[objectKey] &&
+                  data[objectKey][propertyKey] !== undefined
+                ) {
+                  const value = +data[objectKey][propertyKey];
+                  obj[prop] = value;
+                }
+              }
+              return obj;
+            }, {});
+
+            extractedData.push(extractedEntry);
+          });
+        }
+      });
+
+      return extractedData;
+    };
+    // makes sure the type IDs are formatted correctly(an array of arrays)
+    const cleanTypeIds = getCleanTypeIds(priceIds);
+    const batches = splitIntoBatches(cleanTypeIds);
+    const responses = fetchAggregatesData(batches, regionId);
+    const aggregatedPrices = processResponses(responses, cleanTypeIds);
+
+    return includeHeaders
+      ? [
+        config.headers,
+        ...aggregatedPrices.map(row => properties.map(prop => row[prop])),
+      ]
+      : aggregatedPrices.map(row => properties.map(prop => row[prop]));
+  } catch ({ message }) {
+    new Error(message);
+  }
+}
