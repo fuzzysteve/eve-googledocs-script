@@ -1,67 +1,74 @@
-// Import required libraries
-const fetch = require('node-fetch');
-
-// Function to load volumes
-async function loadVolumes(typeID, regionID = 10000002) {
+async function loadAllVolumes(typeID, regionID = 10000002) {
   if (typeof typeID === 'undefined') {
-    throw new Error('Need typeid');
+    throw new Error('need typeid');
   }
 
   const url = `https://crest-tq.eveonline.com/market/${regionID}/history/?type=https://crest-tq.eveonline.com/inventory/types/${typeID}/`;
   const response = await fetch(url);
   const data = await response.json();
+  const volumes = data.items.map(item => item.volume);
 
-  if (!data) {
-    return [];
-  }
-
-  return data.items.map((item) => item.volume);
+  return volumes;
 }
 
-// Function to zero-fill a number
 function zeroFill(number, width) {
-  const numberStr = number.toString();
-  if (numberStr.length >= width) {
-    return numberStr;
+  const numStr = number.toString();
+  width -= numStr.length;
+  
+  if (width > 0) {
+    return '0'.repeat(width + (/\./.test(number) ? 2 : 1)) + numStr;
   }
-
-  const padding = '0'.repeat(width - numberStr.length);
-  return padding + numberStr;
+  
+  return numStr;
 }
 
-// Function to load volumes for the last 30 days
-async function loadThirtyDayVolumes(typeID, regionID = 10000002) {
+async function loadVolume(typeID, regionID = 10000002) {
   if (typeof typeID === 'undefined') {
-    throw new Error('Need typeid');
+    throw new Error('need typeid');
   }
 
   const url = `https://crest-tq.eveonline.com/market/${regionID}/history/?type=https://crest-tq.eveonline.com/inventory/types/${typeID}/`;
   const response = await fetch(url);
   const data = await response.json();
-
-  if (!data) {
-    return [];
-  }
-
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  return data.items
-    .filter((item) => new Date(item.date) >= thirtyDaysAgo)
-    .map((item) => item.volume);
+  const volumes = [];
+  
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const month = d.getMonth() + 1;
+  const yesterday = `${d.getFullYear()}-${zeroFill(month, 2)}-${zeroFill(d.getDate(), 2)}T00:00:00`;
+  
+  data.items.forEach(item => {
+    if (item.date === yesterday) {
+      volumes.push(item.volume);
+    }
+  });
+  
+  return volumes;
 }
 
-// Example usage:
-async function main() {
-  try {
-    const typeID = 12345; // Replace with your desired type ID
-    const allVolumes = await loadVolumes(typeID);
-    const thirtyDayVolumes = await loadThirtyDayVolumes(typeID);
-    console.log('All Volumes:', allVolumes);
-    console.log('30-Day Volumes:', thirtyDayVolumes);
-  } catch (error) {
-    console.error('Error:', error.message);
+async function loadThirtyDayVolume(typeID, regionID = 10000002) {
+  if (typeof typeID === 'undefined') {
+    throw new Error('need typeid');
   }
-}
 
-main();
+  const url = `https://crest-tq.eveonline.com/market/${regionID}/history/?type=https://crest-tq.eveonline.com/inventory/types/${typeID}/`;
+  const response = await fetch(url);
+  const data = await response.json();
+  const volumes = [];
+
+  const d = new Date();
+  const time = Date.UTC(d.getFullYear(), d.getMonth() + 1, d.getDate());
+  const from = time - 2.592e+9;
+
+  data.items.forEach(item => {
+    const year = item.date.substring(0, 4);
+    const month = item.date.substring(5, 7);
+    const day = item.date.substring(8, 10);
+
+    if (Date.UTC(year, month, day) >= from) {
+      volumes.push(item.volume);
+    }
+  });
+
+  return volumes;
+}
