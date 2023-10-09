@@ -1,105 +1,67 @@
-function loadAllVolumes(typeID,regionID){
-  if (typeof regionID == 'undefined'){
-    regionID=10000002;
-  }
-  if (typeof typeID == 'undefined'){
-    throw 'need typeid';
+// Import required libraries
+const fetch = require('node-fetch');
+
+// Function to load volumes
+async function loadVolumes(typeID, regionID = 10000002) {
+  if (typeof typeID === 'undefined') {
+    throw new Error('Need typeid');
   }
 
-  var prices = new Array();
-  var url="https://crest-tq.eveonline.com/market/"+regionID+"/history/?type=https://crest-tq.eveonline.com/inventory/types/"+typeID+"/";
-  
-  var parameters = {method : "get", payload : ""};
-  var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
-  data = JSON.parse(jsonFeed)
-  var volumes = new Array();
-  
-  if (data) {
-    for (var i = 0; i < data.items.length; i++) {
-      volumes.push(data.items[i].volume);
-    }
+  const url = `https://crest-tq.eveonline.com/market/${regionID}/history/?type=https://crest-tq.eveonline.com/inventory/types/${typeID}/`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (!data) {
+    return [];
   }
-  
-  return volumes;
+
+  return data.items.map((item) => item.volume);
 }
 
-
-function zeroFill( number, width )
-{
-  width -= number.toString().length;
-  if ( width > 0 )
-  {
-    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+// Function to zero-fill a number
+function zeroFill(number, width) {
+  const numberStr = number.toString();
+  if (numberStr.length >= width) {
+    return numberStr;
   }
-  return number + ""; // always return a string
+
+  const padding = '0'.repeat(width - numberStr.length);
+  return padding + numberStr;
 }
 
-
-function loadVolume(typeID,regionID){
-  if (typeof regionID == 'undefined'){
-    regionID=10000002;
-  }
-  if (typeof typeID == 'undefined'){
-    throw 'need typeid';
+// Function to load volumes for the last 30 days
+async function loadThirtyDayVolumes(typeID, regionID = 10000002) {
+  if (typeof typeID === 'undefined') {
+    throw new Error('Need typeid');
   }
 
-  var prices = new Array();
-  var url="https://crest-tq.eveonline.com/market/"+regionID+"/history/?type=https://crest-tq.eveonline.com/inventory/types/"+typeID+"/";
-  
-  var parameters = {method : "get", payload : ""};
-  var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
-  var volumes = new Array();
-  
-  data = JSON.parse(jsonFeed)
-  var d = new Date();
-  d.setDate(d.getDate() - 1);
-  month=d.getMonth()+1;
-  yesterday=d.getFullYear()+"-"+zeroFill(month,2)+"-"+zeroFill(d.getDate(),2)+"T00:00:00";
-  
-    if (data) {
-    for (var i = 0; i < data.items.length; i++) {
-      if (data.items[i].date == yesterday) {
-        volumes.push(data.items[i].volume);
-      }
-    }
+  const url = `https://crest-tq.eveonline.com/market/${regionID}/history/?type=https://crest-tq.eveonline.com/inventory/types/${typeID}/`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (!data) {
+    return [];
   }
-  
-  return volumes;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  return data.items
+    .filter((item) => new Date(item.date) >= thirtyDaysAgo)
+    .map((item) => item.volume);
 }
 
-
-
-function loadThirtyDayVolume(typeID,regionID){
-  if (typeof regionID == 'undefined'){
-    regionID=10000002;
+// Example usage:
+async function main() {
+  try {
+    const typeID = 12345; // Replace with your desired type ID
+    const allVolumes = await loadVolumes(typeID);
+    const thirtyDayVolumes = await loadThirtyDayVolumes(typeID);
+    console.log('All Volumes:', allVolumes);
+    console.log('30-Day Volumes:', thirtyDayVolumes);
+  } catch (error) {
+    console.error('Error:', error.message);
   }
-  if (typeof typeID == 'undefined'){
-    throw 'need typeid';
-  }
-
-  var prices = new Array();
-  var url="https://crest-tq.eveonline.com/market/"+regionID+"/history/?type=https://crest-tq.eveonline.com/inventory/types/"+typeID+"/";
-  
-  var parameters = {method : "get", payload : ""};
-  var jsonFeed = UrlFetchApp.fetch(url, parameters).getContentText();
-  var volumes = new Array();
-  
-  data = JSON.parse(jsonFeed)
-  var d = new Date();
-  time=Date.UTC(d.getFullYear(),d.getMonth()+1,d.getDate())
-  from = time - 2.592e+9
- 
-    if (data) {
-    for (var i = 0; i < data.items.length; i++) {
-      year=data.items[i].date.substring(0,4)
-      month=data.items[i].date.substring(5,7)
-      day=data.items[i].date.substring(8,10)
-      
-      if (Date.UTC(year,month,day) >= from) {
-       volumes.push(data.items[i].volume)
-      }
-    }
-  }
-  
-  return volumes;
 }
+
+main();
